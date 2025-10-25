@@ -17,38 +17,82 @@ const ReportSection = () => {
 
   // Available metrics for selection
   const availableMetrics = [
-    { key: 'revenue', label: 'Revenue', unit: 'usd', category: 'Income Statement', concept: 'us-gaap_Revenues' },
-    { key: 'netIncome', label: 'Net Income', unit: 'usd', category: 'Income Statement', concept: 'us-gaap_NetIncomeLoss' },
-    { key: 'operatingIncome', label: 'Operating Income', unit: 'usd', category: 'Income Statement', concept: 'us-gaap_OperatingIncomeLoss' },
-    { key: 'operatingExpenses', label: 'Operating Expenses', unit: 'usd', category: 'Income Statement', concept: 'us-gaap_OperatingExpenses' },
-    { key: 'operatingCashFlow', label: 'Operating Cash Flow', unit: 'usd', category: 'Cash Flow', concept: 'us-gaap_NetCashProvidedByUsedInOperatingActivities' },
-    { key: 'sharesOutstanding', label: 'Shares Outstanding', unit: 'shares', category: 'Balance Sheet', concept: 'us-gaap_CommonStockSharesOutstanding' },
+    { key: 'revenue', label: 'Revenue', unit: 'usd', category: 'Income Statement', 
+      concept: 'us-gaap_Revenues', 
+      alternativeConcepts: ['us-gaap_SalesRevenueNet', 'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax'] },
+    { key: 'netIncome', label: 'Net Income', unit: 'usd', category: 'Income Statement', 
+      concept: 'us-gaap_NetIncomeLoss' },
+    { key: 'operatingIncome', label: 'Operating Income', unit: 'usd', category: 'Income Statement', 
+      concept: 'us-gaap_OperatingIncomeLoss' },
+    { key: 'operatingExpenses', label: 'Operating Expenses', unit: 'usd', category: 'Income Statement', 
+      concept: 'us-gaap_OperatingExpenses' },
+    { key: 'operatingCashFlow', label: 'Operating Cash Flow', unit: 'usd', category: 'Cash Flow', 
+      concept: 'us-gaap_NetCashProvidedByUsedInOperatingActivities' },
+    { key: 'sharesOutstanding', label: 'Shares Outstanding', unit: 'shares', category: 'Balance Sheet', 
+      concept: 'us-gaap_CommonStockSharesOutstanding' },
   ];
 
-  // Extract value from financial statement by concept
-  const extractMetricValue = (report, concept) => {
+  // Extract value from financial statement by concept (with fallbacks)
+  const extractMetricValue = (report, concept, alternativeConcepts = []) => {
     if (!report) return null;
     
     // Search in all statement types (bs, ic, cf)
     const statementTypes = ['bs', 'ic', 'cf'];
     
+    // Try main concept first
     for (const type of statementTypes) {
       if (report[type] && Array.isArray(report[type])) {
         const item = report[type].find(entry => entry.concept === concept);
-        if (item) return item.value;
+        if (item) {
+          console.log(`  Found ${concept} = ${item.value}`);
+          return item.value;
+        }
       }
     }
+    
+    // Try alternative concepts
+    if (alternativeConcepts && alternativeConcepts.length > 0) {
+      for (const altConcept of alternativeConcepts) {
+        for (const type of statementTypes) {
+          if (report[type] && Array.isArray(report[type])) {
+            const item = report[type].find(entry => entry.concept === altConcept);
+            if (item) {
+              console.log(`  Found alternative ${altConcept} = ${item.value}`);
+              return item.value;
+            }
+          }
+        }
+      }
+    }
+    
     return null;
   };
 
   // Process raw API data into chart-friendly format
   const processedChartData = useMemo(() => {
-    if (!rawReportData || !rawReportData.data) return [];
+    console.log('=== Processing Chart Data ===');
+    console.log('rawReportData:', rawReportData);
     
-    console.log('Processing chart data from:', rawReportData);
+    if (!rawReportData) {
+      console.log('No rawReportData');
+      return [];
+    }
     
-    return rawReportData.data
-      .filter(entry => entry.report) // Only entries with reports
+    if (!rawReportData.data) {
+      console.log('No rawReportData.data array');
+      console.log('rawReportData keys:', Object.keys(rawReportData));
+      return [];
+    }
+    
+    console.log('rawReportData.data length:', rawReportData.data.length);
+    console.log('First data entry:', rawReportData.data[0]);
+    
+    const processed = rawReportData.data
+      .filter(entry => {
+        const hasReport = !!entry.report;
+        console.log(`Year ${entry.year} - has report:`, hasReport);
+        return hasReport;
+      })
       .map(entry => {
         const yearData = {
           year: entry.year,
@@ -57,28 +101,43 @@ const ReportSection = () => {
         
         // Extract all metric values for this year
         availableMetrics.forEach(metric => {
-          yearData[metric.key] = extractMetricValue(entry.report, metric.concept);
+          const value = extractMetricValue(entry.report, metric.concept, metric.alternativeConcepts);
+          yearData[metric.key] = value;
+          console.log(`  ${metric.label}: ${value}`);
         });
         
-        console.log(`Year ${entry.year} processed data:`, yearData);
         return yearData;
       })
-      .sort((a, b) => a.year - b.year); // Sort by year ascending
+      .sort((a, b) => a.year - b.year);
+    
+    console.log('Processed chart data:', processed);
+    console.log('=== Processing Complete ===');
+    return processed;
   }, [rawReportData]);
 
   // Calculate latest metrics for summary cards
   const latestMetrics = useMemo(() => {
-    if (!processedChartData || processedChartData.length === 0) return null;
+    console.log('=== Calculating Latest Metrics ===');
+    console.log('processedChartData:', processedChartData);
+    console.log('processedChartData length:', processedChartData?.length);
+    
+    if (!processedChartData || processedChartData.length === 0) {
+      console.log('No processed chart data available');
+      return null;
+    }
     
     const latest = processedChartData[processedChartData.length - 1];
     const previous = processedChartData[processedChartData.length - 2];
+    
+    console.log('Latest year data:', latest);
+    console.log('Previous year data:', previous);
     
     const calculateChange = (current, prev) => {
       if (!current || !prev || prev === 0) return null;
       return ((current - prev) / Math.abs(prev)) * 100;
     };
     
-    return {
+    const metrics = {
       revenue: {
         value: latest.revenue,
         change: previous ? calculateChange(latest.revenue, previous.revenue) : null
@@ -96,6 +155,10 @@ const ReportSection = () => {
         change: previous ? calculateChange(latest.operatingCashFlow, previous.operatingCashFlow) : null
       }
     };
+    
+    console.log('Calculated metrics:', metrics);
+    console.log('=== Metrics Calculation Complete ===');
+    return metrics;
   }, [processedChartData]);
 
   const handleFetchReport = async (e) => {
@@ -135,18 +198,27 @@ const ReportSection = () => {
 
       const data = await response.json();
       console.log('Raw API response:', data);
+      console.log('Response type:', typeof data);
+      console.log('Is array?', Array.isArray(data));
       
-      // Handle n8n webhook response format
+      // Handle n8n webhook response format - multiple levels of nesting
       let reportData = data;
+      
+      // Check for array wrapper with body inside
       if (Array.isArray(data) && data.length > 0 && data[0].body) {
+        console.log('Found data[0].body structure');
         reportData = data[0].body;
-        console.log('Extracted from data[0].body');
-      } else if (data.body) {
+      } 
+      // Check for direct body property
+      else if (data.body) {
+        console.log('Found data.body structure');
         reportData = data.body;
-        console.log('Extracted from data.body');
       }
       
-      console.log('Processed report data:', reportData);
+      console.log('Extracted report data:', reportData);
+      console.log('Report data has "data" array?', reportData?.data ? 'YES' : 'NO');
+      console.log('Report data.data length:', reportData?.data?.length);
+      
       setRawReportData(reportData);
       
     } catch (err) {
