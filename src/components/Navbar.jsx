@@ -58,6 +58,19 @@ const Navbar = ({ activeSection, setActiveSection }) => {
             >
               Reports
             </button>
+            <button
+              onClick={() => {
+                console.log('Navigation clicked: IPO Calendar');
+                setActiveSection('ipo');
+              }}
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+                activeSection === 'ipo'
+                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                  : 'text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-200'
+              }`}
+            >
+              IPO Calendar
+            </button>
           </div>
         </div>
       </div>
