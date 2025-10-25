@@ -46,19 +46,28 @@ const NewsSection = () => {
       const data = await response.json();
       console.log('Response data:', data);
       console.log('Response data type:', typeof data);
-      console.log('Response data keys:', Object.keys(data));
-
+      
       // Handle different response structures
       // Check for n8n webhook response format: {body: [], headers: {}, statusCode: 200}
       let newsArray = [];
       
-      if (data.body && Array.isArray(data.body)) {
+      // Check if response is wrapped in array with body inside first element
+      if (Array.isArray(data) && data.length > 0 && data[0].body && Array.isArray(data[0].body)) {
+        newsArray = data[0].body;
+        console.log('Using data[0].body (n8n Respond to Webhook format)');
+      } 
+      // Check for direct body property
+      else if (data.body && Array.isArray(data.body)) {
         newsArray = data.body;
         console.log('Using data.body (n8n webhook format)');
-      } else if (Array.isArray(data)) {
+      } 
+      // Check if data itself is array of articles
+      else if (Array.isArray(data) && data.length > 0 && data[0].headline) {
         newsArray = data;
-        console.log('Using data directly (array format)');
-      } else if (data.news && Array.isArray(data.news)) {
+        console.log('Using data directly (article array format)');
+      }
+      // Check for nested structures
+      else if (data.news && Array.isArray(data.news)) {
         newsArray = data.news;
         console.log('Using data.news format');
       } else if (data.data && Array.isArray(data.data)) {
