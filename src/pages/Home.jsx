@@ -4,98 +4,129 @@ const Home = () => {
   console.log('Home page rendered');
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-6 py-12">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">
-            Welcome to Financial Dashboard
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-slate-900 mb-4">
+            Financial Intelligence Platform
           </h1>
-          <p className="text-xl text-gray-600">
-            Your gateway to real-time financial news and comprehensive stock reports
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            Access real-time market news and comprehensive financial reports powered by industry-leading data sources.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {/* News Feature */}
-          <div className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="text-5xl mb-4">📰</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">Financial News</h2>
-            <p className="text-gray-600 mb-4">
-              Stay updated with the latest financial news across multiple categories including
-              general market news, forex, cryptocurrency, and mergers & acquisitions.
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          <div className="bg-white rounded-xl border border-slate-200 p-8 hover:border-indigo-300 hover:shadow-xl transition-all duration-200">
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">Financial News</h2>
+            <p className="text-slate-600 mb-4">
+              Stay updated with the latest market news across multiple categories including general market updates, forex movements, cryptocurrency trends, and merger & acquisition activities.
             </p>
-            <ul className="text-sm text-gray-600 space-y-2">
-              <li>✓ Multiple news categories</li>
-              <li>✓ Real-time updates</li>
-              <li>✓ Detailed summaries</li>
-              <li>✓ Direct source links</li>
+            <ul className="space-y-2 text-sm text-slate-600">
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Real-time market updates
+              </li>
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Category-based filtering
+              </li>
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Curated from trusted sources
+              </li>
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Direct source links
+              </li>
             </ul>
           </div>
 
-          {/* Reports Feature */}
-          <div className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="text-5xl mb-4">📈</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-3">Financial Reports</h2>
-            <p className="text-gray-600 mb-4">
-              Access comprehensive financial reports for any publicly traded company.
-              Get key metrics and insights to make informed investment decisions.
+          <div className="bg-white rounded-xl border border-slate-200 p-8 hover:border-indigo-300 hover:shadow-xl transition-all duration-200">
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">Financial Reports</h2>
+            <p className="text-slate-600 mb-4">
+              Analyze comprehensive financial data for any publicly traded company. View key metrics, historical trends, and year-over-year performance with interactive visualizations.
             </p>
-            <ul className="text-sm text-gray-600 space-y-2">
-              <li>✓ Company financials</li>
-              <li>✓ Key metrics & ratios</li>
-              <li>✓ Revenue & earnings data</li>
-              <li>✓ Quick analysis</li>
+            <ul className="space-y-2 text-sm text-slate-600">
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Interactive charts and graphs
+              </li>
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Historical trend analysis
+              </li>
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                YoY performance metrics
+              </li>
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Key financial ratios
+              </li>
             </ul>
           </div>
         </div>
 
-        {/* How It Works */}
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-8 mb-12">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-            How It Works
-          </h2>
+        {/* How it Works */}
+        <div className="bg-gradient-to-br from-indigo-50 to-slate-50 rounded-xl border border-indigo-100 p-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3">
+              <div className="w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 1
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">Choose a Section</h3>
-              <p className="text-sm text-gray-600">
-                Navigate to News or Reports using the navigation bar
-              </p>
+              <h3 className="font-semibold text-slate-900 mb-2">Select Category</h3>
+              <p className="text-sm text-slate-600">Choose between News or Reports to access the information you need.</p>
             </div>
             <div className="text-center">
-              <div className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3">
+              <div className="w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 2
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">Enter Your Query</h3>
-              <p className="text-sm text-gray-600">
-                Select a news category or enter a stock symbol
-              </p>
+              <h3 className="font-semibold text-slate-900 mb-2">Enter Parameters</h3>
+              <p className="text-sm text-slate-600">Specify your search criteria such as news category or stock symbol.</p>
             </div>
             <div className="text-center">
-              <div className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3">
+              <div className="w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 3
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2">Get Instant Results</h3>
-              <p className="text-sm text-gray-600">
-                View beautifully formatted financial data instantly
-              </p>
+              <h3 className="font-semibold text-slate-900 mb-2">Analyze Results</h3>
+              <p className="text-sm text-slate-600">View formatted data with interactive visualizations and insights.</p>
             </div>
           </div>
         </div>
 
-        {/* Tech Info */}
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Powered by n8n Workflows
-          </h3>
-          <p className="text-sm text-gray-600">
-            This dashboard integrates seamlessly with n8n cloud workflows via webhooks,
-            providing real-time financial data from trusted sources like Finnhub API.
-          </p>
+        {/* CTA Section */}
+        <div className="text-center mt-12">
+          <p className="text-slate-600 mb-2">Powered by Finnhub and Financial Modeling Prep APIs</p>
+          <p className="text-sm text-slate-500">Data updated in real-time through automated workflows</p>
         </div>
       </div>
     </div>

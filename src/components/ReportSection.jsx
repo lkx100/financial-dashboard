@@ -245,15 +245,18 @@ const ReportSection = () => {
   }, [selectedMetricKeys]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-6 py-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">📈 Financial Reports</h1>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">Financial Reports</h1>
+          <p className="text-slate-600">Analyze company financials with interactive visualizations</p>
+        </div>
 
         {/* Search Form */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
           <form onSubmit={handleFetchReport} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Stock Symbol
               </label>
               <input
@@ -261,10 +264,10 @@ const ReportSection = () => {
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
                 placeholder="e.g., AAPL, TSLA, MSFT"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 uppercase"
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-slate-500 mt-1.5">
                 Enter a valid stock ticker symbol
               </p>
             </div>
@@ -272,17 +275,27 @@ const ReportSection = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {loading ? '🔄 Loading...' : '📊 Get Report'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </>
+              ) : (
+                'Get Report'
+              )}
             </button>
           </form>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
-            <strong>Error:</strong> {error}
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg mb-6">
+            <strong className="font-semibold">Error:</strong> {error}
           </div>
         )}
 
@@ -301,9 +314,18 @@ const ReportSection = () => {
         {!loading && rawReportData && latestMetrics && (
           <div className="space-y-8">
             {/* Company Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg shadow-lg p-6">
-              <h2 className="text-3xl font-bold">{symbol.toUpperCase()}</h2>
-              <p className="text-blue-100 mt-1">Financial Analysis • Latest: {processedChartData[processedChartData.length - 1]?.year}</p>
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl border border-indigo-500 shadow-lg p-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold">{symbol.toUpperCase()}</h2>
+                  <p className="text-indigo-100 mt-2">Financial Analysis • Latest: {processedChartData[processedChartData.length - 1]?.year}</p>
+                </div>
+                <div className="w-16 h-16 bg-white/10 rounded-lg flex items-center justify-center">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Summary Cards */}
@@ -312,49 +334,45 @@ const ReportSection = () => {
                 title="Revenue"
                 value={latestMetrics.revenue.value}
                 change={latestMetrics.revenue.change}
-                icon="💰"
                 unit="usd"
               />
               <MetricCard
                 title="Net Income"
                 value={latestMetrics.netIncome.value}
                 change={latestMetrics.netIncome.change}
-                icon="📊"
                 unit="usd"
               />
               <MetricCard
                 title="Operating Income"
                 value={latestMetrics.operatingIncome.value}
                 change={latestMetrics.operatingIncome.change}
-                icon="⚙️"
                 unit="usd"
               />
               <MetricCard
                 title="Operating Cash Flow"
                 value={latestMetrics.operatingCashFlow.value}
                 change={latestMetrics.operatingCashFlow.change}
-                icon="💵"
                 unit="usd"
               />
             </div>
 
             {/* Chart Controls */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">📈 Chart Controls</h3>
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <h3 className="text-xl font-bold text-slate-900 mb-6">Chart Controls</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Chart Type */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Chart Type</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Chart Type</label>
                   <div className="flex gap-2">
                     {['line', 'bar', 'area'].map(type => (
                       <button
                         key={type}
                         onClick={() => setChartType(type)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                           chartType === type
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-indigo-600 text-white shadow-md'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                         }`}
                       >
                         {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -365,16 +383,16 @@ const ReportSection = () => {
 
                 {/* Time Range */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Time Range</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Time Range</label>
                   <div className="flex gap-2">
                     {['1y', '3y', '5y', 'all'].map(range => (
                       <button
                         key={range}
                         onClick={() => setTimeRange(range)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                           timeRange === range
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-indigo-600 text-white shadow-md'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                         }`}
                       >
                         {range.toUpperCase()}
@@ -385,17 +403,17 @@ const ReportSection = () => {
 
                 {/* Metrics Selector */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Metrics to Display</label>
-                  <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Metrics to Display</label>
+                  <div className="space-y-2.5">
                     {availableMetrics.slice(0, 4).map(metric => (
-                      <label key={metric.key} className="flex items-center space-x-2 cursor-pointer">
+                      <label key={metric.key} className="flex items-center space-x-2.5 cursor-pointer group">
                         <input
                           type="checkbox"
                           checked={selectedMetricKeys.includes(metric.key)}
                           onChange={() => toggleMetric(metric.key)}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-2 focus:ring-indigo-500"
                         />
-                        <span className="text-sm text-gray-700">{metric.label}</span>
+                        <span className="text-sm text-slate-700 group-hover:text-slate-900">{metric.label}</span>
                       </label>
                     ))}
                   </div>
@@ -413,8 +431,11 @@ const ReportSection = () => {
                 loading={false}
               />
             ) : (
-              <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                <p className="text-gray-500 text-lg">Please select at least one metric to display</p>
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-16 text-center">
+                <svg className="w-16 h-16 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p className="text-slate-600 text-lg">Please select at least one metric to display</p>
               </div>
             )}
           </div>

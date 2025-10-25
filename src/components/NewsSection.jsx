@@ -94,16 +94,19 @@ const NewsSection = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-6 py-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">📰 Financial News</h1>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">Financial News</h1>
+          <p className="text-slate-600">Stay updated with the latest market developments</p>
+        </div>
 
         {/* Search Form */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
           <form onSubmit={handleFetchNews} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Category
                 </label>
                 <select
@@ -112,7 +115,7 @@ const NewsSection = () => {
                     console.log('Category changed to:', e.target.value);
                     setCategory(e.target.value);
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-slate-900"
                 >
                   <option value="general">General</option>
                   <option value="forex">Forex</option>
@@ -122,7 +125,7 @@ const NewsSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
                   Min ID (Optional)
                 </label>
                 <input
@@ -130,7 +133,7 @@ const NewsSection = () => {
                   value={minId}
                   onChange={(e) => setMinId(e.target.value)}
                   placeholder="e.g., 12345"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -138,31 +141,45 @@ const NewsSection = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {loading ? '🔄 Loading...' : '🔍 Fetch News'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </>
+              ) : (
+                'Fetch News'
+              )}
             </button>
           </form>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
-            <strong>Error:</strong> {error}
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg mb-6">
+            <strong className="font-semibold">Error:</strong> {error}
           </div>
         )}
 
         {/* Loading Spinner */}
         {loading && (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600"></div>
           </div>
         )}
 
         {/* News Results */}
         {!loading && newsData.length === 0 && !error && (
-          <div className="text-center py-12 text-gray-500">
-            <p className="text-xl">📭 No news articles found. Try fetching news!</p>
+          <div className="text-center py-16 bg-slate-50 rounded-xl border border-slate-200">
+            <svg className="w-16 h-16 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+            </svg>
+            <p className="text-xl text-slate-600">No news articles found</p>
+            <p className="text-sm text-slate-500 mt-2">Select a category and click "Fetch News" to get started</p>
           </div>
         )}
 
@@ -173,7 +190,7 @@ const NewsSection = () => {
               return (
                 <div
                   key={article.id || index}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+                  className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-indigo-300 hover:shadow-xl transition-all duration-200"
                 >
               
                 {article.image && (
@@ -187,15 +204,15 @@ const NewsSection = () => {
                     }}
                   />
                 )}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
+                <div className="p-5">
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2">
                     {article.headline || 'No headline'}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                  <p className="text-sm text-slate-600 mb-4 line-clamp-3">
                     {article.summary || 'No summary available'}
                   </p>
-                  <div className="flex justify-between items-center text-sm text-gray-500 mb-3">
-                    <span>📰 {article.source || 'Unknown source'}</span>
+                  <div className="flex justify-between items-center text-xs text-slate-500 mb-4">
+                    <span className="font-medium">{article.source || 'Unknown source'}</span>
                     {article.datetime && (
                       <span>{new Date(article.datetime * 1000).toLocaleDateString()}</span>
                     )}
@@ -206,9 +223,9 @@ const NewsSection = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => console.log('Opening article:', article.url)}
-                      className="block text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      className="block text-center bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                     >
-                      Read More →
+                      Read More
                     </a>
                   )}
                 </div>

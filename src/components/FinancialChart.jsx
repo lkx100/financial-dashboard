@@ -43,10 +43,10 @@ const FinancialChart = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 h-96 flex items-center justify-center">
+      <div className="bg-white rounded-xl border border-slate-200 p-6 h-96 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading chart...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-slate-500">Loading chart...</p>
         </div>
       </div>
     );
@@ -54,23 +54,23 @@ const FinancialChart = ({
 
   if (!filteredData || filteredData.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 h-96 flex items-center justify-center">
-        <p className="text-gray-500 text-lg">No data available for the selected time range</p>
+      <div className="bg-white rounded-xl border border-slate-200 p-6 h-96 flex items-center justify-center">
+        <p className="text-slate-500 text-lg">No data available for the selected time range</p>
       </div>
     );
   }
 
   // Color palette for different metrics
-  const colors = ['#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', '#db2777'];
+  const colors = ['#4f46e5', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 border border-gray-300 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900 mb-2">Year {label}</p>
+        <div className="bg-white p-4 border border-slate-300 rounded-lg shadow-lg">
+          <p className="font-semibold text-slate-900 mb-2">Year {label}</p>
           {payload.map((entry, index) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
+            <p key={index} className="text-sm font-medium" style={{ color: entry.color }}>
               {entry.name}: {formatValue(entry.value, entry.unit)}
             </p>
           ))}
@@ -185,7 +185,7 @@ const FinancialChart = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-lg">
       <ResponsiveContainer width="100%" height={400}>
         {renderChart()}
       </ResponsiveContainer>
