@@ -1,12 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import MetricCard from './MetricCard';
+import FinancialChart from './FinancialChart';
 
 const ReportSection = () => {
   const [symbol, setSymbol] = useState('');
-  const [reportData, setReportData] = useState(null);
+  const [rawReportData, setRawReportData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Chart controls
+  const [chartType, setChartType] = useState('line');
+  const [timeRange, setTimeRange] = useState('5y');
+  const [selectedMetricKeys, setSelectedMetricKeys] = useState(['netIncome', 'revenue']);
 
   const WEBHOOK_URL = 'https://lkx100.app.n8n.cloud/webhook-test/8c0d0c76-69db-495a-bb78-c038a6bc301a';
+
+  // Available metrics for selection
+  const availableMetrics = [
+    { key: 'revenue', label: 'Revenue', unit: 'usd', category: 'Income Statement', concept: 'us-gaap_Revenues' },
+    { key: 'netIncome', label: 'Net Income', unit: 'usd', category: 'Income Statement', concept: 'us-gaap_NetIncomeLoss' },
+    { key: 'operatingIncome', label: 'Operating Income', unit: 'usd', category: 'Income Statement', concept: 'us-gaap_OperatingIncomeLoss' },
+    { key: 'operatingExpenses', label: 'Operating Expenses', unit: 'usd', category: 'Income Statement', concept: 'us-gaap_OperatingExpenses' },
+    { key: 'operatingCashFlow', label: 'Operating Cash Flow', unit: 'usd', category: 'Cash Flow', concept: 'us-gaap_NetCashProvidedByUsedInOperatingActivities' },
+    { key: 'sharesOutstanding', label: 'Shares Outstanding', unit: 'shares', category: 'Balance Sheet', concept: 'us-gaap_CommonStockSharesOutstanding' },
+  ];
+
+  // Extract value from financial statement by concept
+  const extractMetricValue = (report, concept) => {
+    if (!report) return null;
+    
+    // Search in all statement types (bs, ic, cf)
+    const statementTypes = ['bs', 'ic', 'cf'];
+    
+    for (const type of statementTypes) {
+      if (report[type] && Array.isArray(report[type])) {
+        const item = report[type].find(entry => entry.concept === concept);
+        if (item) return item.value;
+      }
+    }
+    return null;
+  };
+
+  // Process raw API data into chart-friendly format
+  const processedChartData = useMemo(() => {
+    if (!rawReportData || !rawReportData.data) return [];
+    
+    console.log('Processing chart data from:', rawReportData);
+    
+    return rawReportData.data
+      .filter(entry => entry.report) // Only entries with reports
+      .map(entry => {
+        const yearData = {
+          year: entry.year,
+          quarter: entry.quarter,
+        };
+        
+        // Extract all metric values for this year
+        availableMetrics.forEach(metric => {
+          yearData[metric.key] = extractMetricValue(entry.report, metric.concept);
+        });
+        
+        console.log(`Year ${entry.year} processed data:`, yearData);
+        return yearData;
+      })
+      .sort((a, b) => a.year - b.year); // Sort by year ascending
+  }, [rawReportData]);
+
+  // Calculate latest metrics for summary cards
+  const latestMetrics = useMemo(() => {
+    if (!processedChartData || processedChartData.length === 0) return null;
+    
+    const latest = processedChartData[processedChartData.length - 1];
+    const previous = processedChartData[processedChartData.length - 2];
+    
+    const calculateChange = (current, prev) => {
+      if (!current || !prev || prev === 0) return null;
+      return ((current - prev) / Math.abs(prev)) * 100;
+    };
+    
+    return {
+      revenue: {
+        value: latest.revenue,
+        change: previous ? calculateChange(latest.revenue, previous.revenue) : null
+      },
+      netIncome: {
+        value: latest.netIncome,
+        change: previous ? calculateChange(latest.netIncome, previous.netIncome) : null
+      },
+      operatingIncome: {
+        value: latest.operatingIncome,
+        change: previous ? calculateChange(latest.operatingIncome, previous.operatingIncome) : null
+      },
+      operatingCashFlow: {
+        value: latest.operatingCashFlow,
+        change: previous ? calculateChange(latest.operatingCashFlow, previous.operatingCashFlow) : null
+      }
+    };
+  }, [processedChartData]);
 
   const handleFetchReport = async (e) => {
     e.preventDefault();
@@ -22,10 +112,9 @@ const ReportSection = () => {
 
     setLoading(true);
     setError(null);
-    setReportData(null);
+    setRawReportData(null);
 
     try {
-      // Build URL with query parameters
       const url = new URL(WEBHOOK_URL);
       url.searchParams.append('symbol', symbol.toUpperCase());
 
@@ -39,19 +128,29 @@ const ReportSection = () => {
       });
 
       console.log('Response status:', response.status);
-      console.log('Response OK:', response.ok);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('Response data:', data);
-
-      setReportData(data);
+      console.log('Raw API response:', data);
+      
+      // Handle n8n webhook response format
+      let reportData = data;
+      if (Array.isArray(data) && data.length > 0 && data[0].body) {
+        reportData = data[0].body;
+        console.log('Extracted from data[0].body');
+      } else if (data.body) {
+        reportData = data.body;
+        console.log('Extracted from data.body');
+      }
+      
+      console.log('Processed report data:', reportData);
+      setRawReportData(reportData);
+      
     } catch (err) {
       console.error('Error fetching report:', err);
-      console.error('Error details:', err.message);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -59,17 +158,23 @@ const ReportSection = () => {
     }
   };
 
-  const renderValue = (value) => {
-    if (value === null || value === undefined) return 'N/A';
-    if (typeof value === 'number') {
-      return value.toLocaleString();
-    }
-    return value;
+  const toggleMetric = (metricKey) => {
+    setSelectedMetricKeys(prev => {
+      if (prev.includes(metricKey)) {
+        return prev.filter(k => k !== metricKey);
+      } else {
+        return [...prev, metricKey];
+      }
+    });
   };
+
+  const selectedMetricsForChart = useMemo(() => {
+    return availableMetrics.filter(m => selectedMetricKeys.includes(m.key));
+  }, [selectedMetricKeys]);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-gray-800 mb-8">📈 Financial Reports</h1>
 
         {/* Search Form */}
@@ -82,10 +187,7 @@ const ReportSection = () => {
               <input
                 type="text"
                 value={symbol}
-                onChange={(e) => {
-                  console.log('Symbol input:', e.target.value);
-                  setSymbol(e.target.value);
-                }}
+                onChange={(e) => setSymbol(e.target.value)}
                 placeholder="e.g., AAPL, TSLA, MSFT"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
                 required
@@ -112,62 +214,141 @@ const ReportSection = () => {
           </div>
         )}
 
-        {/* Loading Spinner */}
+        {/* Loading State */}
         {loading && (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map(i => (
+                <MetricCard key={i} loading={true} />
+              ))}
+            </div>
           </div>
         )}
 
         {/* Report Results */}
-        {!loading && reportData && (
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
-              <h2 className="text-2xl font-bold">
-                {reportData.name || reportData.companyName || symbol.toUpperCase()}
-              </h2>
-              {reportData.ticker && (
-                <p className="text-blue-100 mt-1">Ticker: {reportData.ticker}</p>
-              )}
+        {!loading && rawReportData && latestMetrics && (
+          <div className="space-y-8">
+            {/* Company Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg shadow-lg p-6">
+              <h2 className="text-3xl font-bold">{symbol.toUpperCase()}</h2>
+              <p className="text-blue-100 mt-1">Financial Analysis • Latest: {processedChartData[processedChartData.length - 1]?.year}</p>
             </div>
 
-            <div className="p-6">
-              {/* Render data as key-value pairs */}
-              <div className="space-y-4">
-                {Object.entries(reportData).map(([key, value]) => {
-                  // Skip rendering certain keys
-                  if (key === 'name' || key === 'ticker' || key === 'companyName') {
-                    return null;
-                  }
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <MetricCard
+                title="Revenue"
+                value={latestMetrics.revenue.value}
+                change={latestMetrics.revenue.change}
+                icon="💰"
+                unit="usd"
+              />
+              <MetricCard
+                title="Net Income"
+                value={latestMetrics.netIncome.value}
+                change={latestMetrics.netIncome.change}
+                icon="📊"
+                unit="usd"
+              />
+              <MetricCard
+                title="Operating Income"
+                value={latestMetrics.operatingIncome.value}
+                change={latestMetrics.operatingIncome.change}
+                icon="⚙️"
+                unit="usd"
+              />
+              <MetricCard
+                title="Operating Cash Flow"
+                value={latestMetrics.operatingCashFlow.value}
+                change={latestMetrics.operatingCashFlow.change}
+                icon="💵"
+                unit="usd"
+              />
+            </div>
 
-                  return (
-                    <div
-                      key={key}
-                      className="flex justify-between items-center py-3 border-b border-gray-200 last:border-b-0"
-                    >
-                      <span className="font-semibold text-gray-700 capitalize">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}:
-                      </span>
-                      <span className="text-gray-900 text-right">
-                        {typeof value === 'object' && value !== null
-                          ? JSON.stringify(value)
-                          : renderValue(value)}
-                      </span>
-                    </div>
-                  );
-                })}
-
-                {Object.keys(reportData).length <= 2 && (
-                  <div className="text-center py-6 text-gray-500">
-                    <p>No detailed financial data available</p>
+            {/* Chart Controls */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">📈 Chart Controls</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Chart Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Chart Type</label>
+                  <div className="flex gap-2">
+                    {['line', 'bar', 'area'].map(type => (
+                      <button
+                        key={type}
+                        onClick={() => setChartType(type)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          chartType === type
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
+
+                {/* Time Range */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Time Range</label>
+                  <div className="flex gap-2">
+                    {['1y', '3y', '5y', 'all'].map(range => (
+                      <button
+                        key={range}
+                        onClick={() => setTimeRange(range)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          timeRange === range
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {range.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Metrics Selector */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Metrics to Display</label>
+                  <div className="space-y-2">
+                    {availableMetrics.slice(0, 4).map(metric => (
+                      <label key={metric.key} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedMetricKeys.includes(metric.key)}
+                          onChange={() => toggleMetric(metric.key)}
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">{metric.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Chart */}
+            {selectedMetricKeys.length > 0 ? (
+              <FinancialChart
+                data={processedChartData}
+                chartType={chartType}
+                selectedMetrics={selectedMetricsForChart}
+                timeRange={timeRange}
+                loading={false}
+              />
+            ) : (
+              <div className="bg-white rounded-lg shadow-md p-12 text-center">
+                <p className="text-gray-500 text-lg">Please select at least one metric to display</p>
+              </div>
+            )}
           </div>
         )}
 
-        {!loading && !reportData && !error && (
+        {!loading && !rawReportData && !error && (
           <div className="text-center py-12 text-gray-500">
             <p className="text-xl">📭 Enter a stock symbol to view financial reports</p>
           </div>
