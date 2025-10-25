@@ -45,10 +45,29 @@ const NewsSection = () => {
 
       const data = await response.json();
       console.log('Response data:', data);
+      console.log('Response data type:', typeof data);
+      console.log('Response data keys:', Object.keys(data));
 
       // Handle different response structures
-      const newsArray = Array.isArray(data) ? data : (data.news || data.data || []);
+      // Check for n8n webhook response format: {body: [], headers: {}, statusCode: 200}
+      let newsArray = [];
+      
+      if (data.body && Array.isArray(data.body)) {
+        newsArray = data.body;
+        console.log('Using data.body (n8n webhook format)');
+      } else if (Array.isArray(data)) {
+        newsArray = data;
+        console.log('Using data directly (array format)');
+      } else if (data.news && Array.isArray(data.news)) {
+        newsArray = data.news;
+        console.log('Using data.news format');
+      } else if (data.data && Array.isArray(data.data)) {
+        newsArray = data.data;
+        console.log('Using data.data format');
+      }
+      
       console.log('Parsed news array length:', newsArray.length);
+      console.log('First article sample:', newsArray[0]);
 
       setNewsData(newsArray);
 
@@ -140,11 +159,14 @@ const NewsSection = () => {
 
         {!loading && newsData.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {newsData.map((article, index) => (
-              <div
-                key={article.id || index}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-              >
+            {newsData.map((article, index) => {
+              if (index === 0) console.log('Rendering first article:', article);
+              return (
+                <div
+                  key={article.id || index}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+                >
+              
                 {article.image && (
                   <img
                     src={article.image}
@@ -182,7 +204,8 @@ const NewsSection = () => {
                   )}
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
